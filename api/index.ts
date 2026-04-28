@@ -16,8 +16,15 @@ function bootstrap() {
       app.use(express.json({ limit: '10mb' }));
       app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
+      const allowedOrigin = process.env.FRONTEND_ORIGIN ?? 'http://localhost:5173';
       app.enableCors({
-        origin: process.env.FRONTEND_ORIGIN ?? 'http://localhost:5173',
+        origin: (origin, callback) => {
+          if (!origin || origin === allowedOrigin || origin.endsWith('.vercel.app')) {
+            callback(null, true);
+          } else {
+            callback(new Error('Not allowed by CORS'));
+          }
+        },
         credentials: true
       });
 
