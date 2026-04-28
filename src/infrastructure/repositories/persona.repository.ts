@@ -9,13 +9,22 @@ export class PersonaRepository extends BaseRepository {
   }
 
   async findById(id: string) {
-    const { data, error } = await this.table().select('*').eq('id', id).single();
+    const { data, error } = await this.table().select('*').eq('id', id).maybeSingle();
     if (error) throw error;
     return data;
   }
 
   async findByCorreo(correo: string) {
     const { data, error } = await this.table().select('*').eq('correo', correo).maybeSingle();
+    if (error) throw error;
+    return data;
+  }
+
+  async upsert(payload: { id: string; nombre: string; correo: string }) {
+    const { data, error } = await this.table()
+      .upsert(payload, { onConflict: 'id' })
+      .select()
+      .single();
     if (error) throw error;
     return data;
   }

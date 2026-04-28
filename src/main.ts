@@ -2,6 +2,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { AppExceptionFilter } from './shared/filters/app-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -21,6 +22,7 @@ async function bootstrap() {
       transform: true
     })
   );
+  app.useGlobalFilters(new AppExceptionFilter());
 
   await app.listen(config.get<number>('PORT') ?? 3000);
 }

@@ -33,6 +33,13 @@ export class CompetitionFacade {
       this.teams.list(competitionId),
       this.judges.list(competitionId)
     ]);
-    return { equipos: teams, jueces: judges };
+    return {
+      equipos: teams,
+      jueces: judges.map((judge: any) => ({
+        id: judge.persona_id,
+        nombre: judge.persona?.nombre ?? '',
+        correo: judge.persona?.correo ?? ''
+      }))
+    };
   }
 }

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Headers, Param, Patch, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Headers, Param, Patch, Post, Query } from '@nestjs/common';
 import { CreateSurveyDto, UpdateSurveyAssignmentsDto, UpdateSurveyScheduleDto, UpdateSurveyStateDto } from '../../shared/dto/survey.dto';
 import { SurveyService } from './survey.service';
 
@@ -48,6 +48,16 @@ export class SurveyController {
   @Patch('surveys/:surveyId/assignments')
   updateAssignments(@Param('surveyId') surveyId: string, @Body() dto: UpdateSurveyAssignmentsDto) {
     return this.surveys.updateAssignments(Number(surveyId), dto.equipoIds, dto.juecesIds);
+  }
+
+  @Delete('surveys/:surveyId')
+  delete(@Param('surveyId') surveyId: string) {
+    return this.surveys.delete(Number(surveyId));
+  }
+
+  @Post('surveys/process-scheduled')
+  processScheduledAll(@Query('competicionId') competicionId?: string) {
+    return this.surveys.processScheduled(undefined, competicionId ? Number(competicionId) : undefined);
   }
 
   @Post('surveys/:surveyId/process-scheduled')

@@ -19,7 +19,10 @@ export class AuthService {
       options: { data: { nombre: dto.nombre } }
     });
     if (error) throw error;
-    return data;
+    const perfil = data.user
+      ? await this.personas.upsert({ id: data.user.id, nombre: dto.nombre, correo: dto.correo })
+      : null;
+    return { ...data, perfil };
   }
 
   async login(dto: LoginDto) {
@@ -28,7 +31,11 @@ export class AuthService {
       password: dto.password
     });
     if (error) throw error;
-    const perfil = data.user ? await this.personas.findById(data.user.id) : null;
+    const nombre = data.user?.user_metadata?.nombre ?? dto.correo.split('@')[0];
+    const perfil = data.user
+      ? (await this.personas.findById(data.user.id)) ??
+        (await this.personas.upsert({ id: data.user.id, nombre, correo: dto.correo }))
+      : null;
     const rol = data.user ? await this.roles.resolveRole(data.user.id) : null;
     return { session: data.session, user: data.user, perfil, rol };
   }

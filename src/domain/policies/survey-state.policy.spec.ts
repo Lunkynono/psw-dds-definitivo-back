@@ -23,8 +23,9 @@ describe('SurveyStatePolicy.puedeCambiarEstado', () => {
     expect(SurveyStatePolicy.puedeCambiarEstado('abierta', 'cerrada')).toBe(true);
   });
 
-  it('rechaza reabrir una encuesta cerrada', () => {
-    expect(SurveyStatePolicy.puedeCambiarEstado('cerrada', 'abierta')).toBe(false);
+  it('permite reabrir o reprogramar una encuesta cerrada', () => {
+    expect(SurveyStatePolicy.puedeCambiarEstado('cerrada', 'abierta')).toBe(true);
+    expect(SurveyStatePolicy.puedeCambiarEstado('cerrada', 'programada')).toBe(true);
     expect(SurveyStatePolicy.puedeCambiarEstado('cerrada', 'borrador')).toBe(false);
   });
 

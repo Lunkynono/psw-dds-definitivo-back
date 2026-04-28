@@ -112,6 +112,11 @@ export class EquipoRepository {
     }
 
     await this.supabase.from('encuesta_equipo').delete().eq('equipo_id', equipoId);
+    await this.supabase.from('participante').delete().eq('equipo_id', equipoId);
+    if (proyectoIds.length > 0) {
+      await this.supabase.from('resultado').delete().in('proyecto_id', proyectoIds);
+      await this.supabase.from('proyecto').delete().eq('equipo_id', equipoId);
+    }
     const { error } = await this.supabase.from('equipo').delete().eq('id', equipoId);
     if (error) throw error;
   }

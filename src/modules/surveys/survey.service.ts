@@ -22,10 +22,10 @@ export class SurveyService {
   }
 
   async create(competitionId: number, creatorId: string, dto: CreateSurveyDto) {
-    const criterioIds = await this.criterios.ensureCommentCriterion(competitionId, dto.criterioIds);
+    const criterioIds = await this.criterios.ensureCommentCriterion(competitionId, dto.criterioIds ?? []);
 
-    const estadoEncuesta = dto.horaApertura ? 'programada' : 'abierta';
-    const horaAperturaReal = dto.horaApertura ?? new Date().toISOString();
+    const estadoEncuesta = dto.estado === 'borrador' ? 'borrador' : dto.horaApertura ? 'programada' : 'abierta';
+    const horaAperturaReal = estadoEncuesta === 'borrador' ? null : dto.horaApertura ?? new Date().toISOString();
 
     return this.encuestas.createWithCriteria(
       {
@@ -72,5 +72,9 @@ export class SurveyService {
 
   processScheduled(encuestaId?: number, competicionId?: number) {
     return this.encuestas.processScheduled(encuestaId, competicionId);
+  }
+
+  delete(surveyId: number) {
+    return this.encuestas.deleteClosed(surveyId);
   }
 }

@@ -3,6 +3,7 @@ import { CriterioChecklist } from './criterio-checklist';
 import { CriterioComentario } from './criterio-comentario';
 import { CriterioNumerico } from './criterio-numerico';
 import { CriterioRadio } from './criterio-radio';
+import { CriterioRubrica } from './criterio-rubrica';
 
 /**
  * Factory Method para construir el `Criterio` correcto en función del tipo.
@@ -43,6 +44,10 @@ export class CriterioFactory {
 
     if (input.tipo === 'checklist') {
       return new CriterioChecklist(input.id ?? null, input.competicionId, input.titulo, descripcion, peso, orden, opciones, input.maxSelecciones ?? null);
+    }
+
+    if (input.tipo === 'rubrica') {
+      return new CriterioRubrica(input.id ?? null, input.competicionId, input.titulo, descripcion, peso, orden, opciones);
     }
 
     return new CriterioComentario(input.id ?? null, input.competicionId, input.titulo, descripcion, 'comentario', peso, orden);

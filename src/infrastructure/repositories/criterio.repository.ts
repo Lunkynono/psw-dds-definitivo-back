@@ -71,6 +71,12 @@ export class CriterioRepository extends BaseRepository {
   }
 
   async delete(id: number) {
+    const { error: relationError } = await this.supabase.from('encuesta_criterio').delete().eq('criterio_id', id);
+    if (relationError) throw relationError;
+
+    const { error: optionError } = await this.supabase.from('criterio_opcion').delete().eq('criterio_id', id);
+    if (optionError) throw optionError;
+
     const { error } = await this.table().delete().eq('id', id);
     if (error) throw error;
   }

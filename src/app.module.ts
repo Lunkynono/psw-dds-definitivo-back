@@ -7,6 +7,7 @@ import { EventController } from './modules/events/event.controller';
 import { JudgeController } from './modules/judges/judge.controller';
 import { JudgeVotingController } from './modules/voting/judge-voting.controller';
 import { PublicVotingController } from './modules/public-voting/public-voting.controller';
+import { ParticipantDashboardController } from './modules/participants/participant-dashboard.controller';
 import { ResultsController } from './modules/results/results.controller';
 import { SurveyController } from './modules/surveys/survey.controller';
 import { TeamController } from './modules/teams/team.controller';
@@ -17,6 +18,7 @@ import { CriteriaService } from './modules/criteria/criteria.service';
 import { EventService } from './modules/events/event.service';
 import { JudgeAssignmentService } from './modules/judges/judge-assignment.service';
 import { PublicVotingService } from './modules/public-voting/public-voting.service';
+import { ParticipantDashboardService } from './modules/participants/participant-dashboard.service';
 import { ResultCalculationService } from './modules/results/result-calculation.service';
 import { SurveyService } from './modules/surveys/survey.service';
 import { TeamRegistrationService } from './modules/teams/team-registration.service';
@@ -49,6 +51,7 @@ import { ResultScoreCalculator } from './domain/services/result-score.calculator
     CriteriaController,
     SurveyController,
     JudgeController,
+    ParticipantDashboardController,
     JudgeVotingController,
     PublicVotingController,
     ResultsController
@@ -73,6 +76,7 @@ import { ResultScoreCalculator } from './domain/services/result-score.calculator
     CriteriaService,
     SurveyService,
     JudgeAssignmentService,
+    ParticipantDashboardService,
     JudgeVotingService,
     PublicVotingService,
     ResultCalculationService,

@@ -23,7 +23,7 @@ export class SurveyStatePolicy {
       borrador: ['abierta', 'programada', 'cerrada'],
       programada: ['abierta', 'cerrada'],
       abierta: ['cerrada'],
-      cerrada: ['abierta']
+      cerrada: ['abierta', 'programada']
     };
 
     return transicionesPermitidas[estadoActual]?.includes(estadoNuevo) ?? false;

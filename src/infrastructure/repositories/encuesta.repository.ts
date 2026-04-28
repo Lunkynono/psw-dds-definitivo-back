@@ -112,8 +112,19 @@ export class EncuestaRepository extends BaseRepository {
   }
 
   async updateState(encuestaId: number, estado: string) {
+    const { data: actual, error: actualError } = await this.table()
+      .select('estado')
+      .eq('id', encuestaId)
+      .single();
+    if (actualError) throw actualError;
+
     const payload: Record<string, unknown> = { estado };
-    if (estado === 'abierta') payload.hora_apertura = new Date().toISOString();
+    if (estado === 'abierta') {
+      const ahora = new Date().toISOString();
+      payload.hora_apertura = ahora;
+      payload.hora_cierre = null;
+      payload.hora_reapertura = actual.estado === 'cerrada' ? ahora : null;
+    }
     if (estado === 'cerrada') payload.hora_cierre = new Date().toISOString();
     const { data, error } = await this.table().update(payload).eq('id', encuestaId).select().single();
     if (error) throw error;
@@ -121,11 +132,17 @@ export class EncuestaRepository extends BaseRepository {
   }
 
   async updateSchedule(encuestaId: number, horaApertura: string | null, horaCierre: string | null) {
+    const { data: actual, error: actualError } = await this.table()
+      .select('estado, hora_apertura')
+      .eq('id', encuestaId)
+      .single();
+    if (actualError) throw actualError;
+
     const now = new Date().toISOString();
     const estado = horaApertura ? 'programada' : 'abierta';
     const payload: Record<string, unknown> = {
       estado,
-      hora_apertura: horaApertura ?? now,
+      hora_apertura: horaApertura ?? (actual.estado === 'abierta' ? actual.hora_apertura ?? now : now),
       hora_cierre: horaCierre ?? null
     };
     const { data, error } = await this.table().update(payload).eq('id', encuestaId).select().single();
@@ -156,5 +173,43 @@ export class EncuestaRepository extends BaseRepository {
       await cerrarQuery;
     }
     return true;
+  }
+
+  async deleteClosed(encuestaId: number) {
+    const encuesta = await this.findById(encuestaId);
+    if (encuesta.estado !== 'cerrada') {
+      throw new Error('Solo se pueden eliminar encuestas cerradas');
+    }
+
+    const [{ data: votosJuez }, { data: votosPublico }] = await Promise.all([
+      this.supabase.from('voto').select('id').eq('encuesta_id', encuestaId),
+      this.supabase.from('voto_publico').select('id').eq('encuesta_id', encuestaId)
+    ]);
+    const votoIds = (votosJuez ?? []).map((v: any) => v.id);
+    const votoPublicoIds = (votosPublico ?? []).map((v: any) => v.id);
+
+    if (votoIds.length > 0) {
+      const { error } = await this.supabase.from('respuesta_criterio').delete().in('voto_id', votoIds);
+      if (error) throw error;
+    }
+    if (votoPublicoIds.length > 0) {
+      const { error } = await this.supabase.from('respuesta_criterio_publico').delete().in('voto_publico_id', votoPublicoIds);
+      if (error) throw error;
+    }
+
+    const relationDeletes = await Promise.all([
+      this.supabase.from('resultado').delete().eq('encuesta_id', encuestaId),
+      this.supabase.from('publico_registro').delete().eq('encuesta_id', encuestaId),
+      this.supabase.from('voto').delete().eq('encuesta_id', encuestaId),
+      this.supabase.from('voto_publico').delete().eq('encuesta_id', encuestaId),
+      this.supabase.from('encuesta_criterio').delete().eq('encuesta_id', encuestaId),
+      this.supabase.from('encuesta_equipo').delete().eq('encuesta_id', encuestaId),
+      this.supabase.from('encuesta_juez').delete().eq('encuesta_id', encuestaId)
+    ]);
+    const relationError = relationDeletes.find((result: any) => result.error)?.error;
+    if (relationError) throw relationError;
+
+    const { error } = await this.table().delete().eq('id', encuestaId);
+    if (error) throw error;
   }
 }

@@ -82,20 +82,7 @@ export class CriteriaService {
   }
 
   async ensureCommentCriterion(competitionId: number, criterioIds: number[]) {
-    const criterios = await this.criterios.findByCompeticion(competitionId);
-    const seleccionados = criterios.filter((criterio: any) => criterioIds.includes(criterio.id));
-    const hasComment = seleccionados.some((criterio: any) => criterio.tipo === 'comentario');
-    if (hasComment) return criterioIds;
-
-    const comentario = await this.criterios.create({
-      competicion_id: competitionId,
-      titulo: 'Comentarios adicionales',
-      descripcion: null,
-      tipo: 'comentario',
-      peso: 1,
-      orden: criterios.length
-    });
-
-    return [...criterioIds, comentario.id];
+    void competitionId;
+    return criterioIds;
   }
 }

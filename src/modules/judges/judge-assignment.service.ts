@@ -56,17 +56,15 @@ export class JudgeAssignmentService {
     });
     if (error && error.code !== '23505') throw error;
 
-    // Si el cliente no eligió encuestas, propagamos a todas las de la competición
-    let encuestaIds = dto.encuestaIds ?? [];
-    if (encuestaIds.length === 0) {
-      const todas = await this.encuestas.findByCompeticion(competitionId);
-      encuestaIds = todas.map((encuesta: any) => encuesta.id);
-    }
+    const encuestaIds = dto.encuestaIds ?? [];
 
     if (encuestaIds.length > 0) {
-      const { error: encuestaError } = await this.supabase.from('encuesta_juez').insert(
-        encuestaIds.map((encuestaId) => ({ encuesta_id: encuestaId, persona_id: persona.id }))
-      );
+      const { error: encuestaError } = await this.supabase
+        .from('encuesta_juez')
+        .upsert(
+          encuestaIds.map((encuestaId) => ({ encuesta_id: encuestaId, persona_id: persona.id })),
+          { onConflict: 'encuesta_id,persona_id', ignoreDuplicates: true }
+        );
       if (encuestaError && encuestaError.code !== '23505') throw encuestaError;
     }
 
@@ -75,6 +73,17 @@ export class JudgeAssignmentService {
 
   /** Elimina la asignación de un juez de una competición concreta. */
   async remove(competitionId: number, personId: string) {
+    const encuestas = await this.encuestas.findByCompeticion(competitionId);
+    const encuestaIds = encuestas.map((encuesta: any) => encuesta.id);
+    if (encuestaIds.length > 0) {
+      const { error: encuestaError } = await this.supabase
+        .from('encuesta_juez')
+        .delete()
+        .eq('persona_id', personId)
+        .in('encuesta_id', encuestaIds);
+      if (encuestaError) throw encuestaError;
+    }
+
     const { error } = await this.supabase
       .from('competicion_juez')
       .delete()

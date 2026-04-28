@@ -1,4 +1,4 @@
-export type CriterioTipo = 'numerico' | 'radio' | 'checklist' | 'comentario';
+export type CriterioTipo = 'numerico' | 'radio' | 'checklist' | 'rubrica' | 'comentario';
 
 export interface CriterioOpcion {
   id?: number;

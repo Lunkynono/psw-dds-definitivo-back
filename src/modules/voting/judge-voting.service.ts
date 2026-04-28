@@ -47,10 +47,14 @@ export class JudgeVotingService {
     return Promise.all(
       encuestasAbiertas.map(async (encuesta: any) => {
         const proyectos = await this.findProyectosCompeticion(encuesta.competicion_id);
+        const equipoIds = new Set(await this.encuestas.findEquipos(encuesta.id));
         const voterHash = this.hashes.generar(userId, encuesta.id);
         const votados = await this.findVotedProjectIds(encuesta.id, voterHash);
-        const pendientes = proyectos.filter((p: any) => !votados.has(p.id));
-        return { ...encuesta, proyectos, pendientes };
+        const proyectosAsignados = equipoIds.size > 0
+          ? proyectos.filter((p: any) => equipoIds.has(p.equipo_id))
+          : proyectos;
+        const pendientes = proyectosAsignados.filter((p: any) => !votados.has(p.id));
+        return { ...encuesta, proyectos: proyectosAsignados, pendientes };
       })
     );
   }
@@ -61,7 +65,11 @@ export class JudgeVotingService {
       this.encuestas.findById(surveyId),
       this.encuestas.findCriteria(surveyId)
     ]);
-    const proyectos = (encuesta.competicion?.equipo ?? []).flatMap((equipo: any) => equipo.proyecto ?? []);
+    const equiposAsignados = new Set(await this.encuestas.findEquipos(surveyId));
+    const equipos = equiposAsignados.size > 0
+      ? (encuesta.competicion?.equipo ?? []).filter((equipo: any) => equiposAsignados.has(equipo.id))
+      : (encuesta.competicion?.equipo ?? []);
+    const proyectos = equipos.flatMap((equipo: any) => equipo.proyecto ?? []);
     const proyecto = proyectos.find((item: any) => item.id === projectId);
     return { encuesta, proyecto, criterios };
   }
@@ -91,10 +99,12 @@ export class JudgeVotingService {
   private async findProyectosCompeticion(competicionId: number) {
     const { data, error } = await this.supabase
       .from('equipo')
-      .select('proyecto(*)')
+      .select('id, proyecto(*)')
       .eq('competicion_id', competicionId);
     if (error) throw error;
-    return (data ?? []).flatMap((eq: any) => eq.proyecto ?? []);
+    return (data ?? []).flatMap((eq: any) =>
+      (eq.proyecto ?? []).map((proyecto: any) => ({ ...proyecto, equipo_id: proyecto.equipo_id ?? eq.id }))
+    );
   }
 
   /** Conjunto de IDs de proyecto ya votados por un juez en una encuesta. */

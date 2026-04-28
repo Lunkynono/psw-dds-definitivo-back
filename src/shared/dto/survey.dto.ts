@@ -15,6 +15,10 @@ export class CreateSurveyDto {
   @IsNumber()
   peso: number = 1;
 
+  @IsOptional()
+  @IsIn(['borrador', 'abierta', 'programada', 'cerrada'])
+  estado?: 'borrador' | 'abierta' | 'programada' | 'cerrada';
+
   @IsArray()
   criterioIds: number[] = [];
 

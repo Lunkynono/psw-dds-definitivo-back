@@ -94,10 +94,11 @@ export class ResultCalculationService {
   }
 
   private async recolectarDatos(surveyId: number) {
-    const [encuesta, criterios, juezNumericas, publicoNumericas, juezOpciones, publicoOpciones, juezCounts, publicoCounts] =
+    const [encuesta, criterios, equiposAsignados, juezNumericas, publicoNumericas, juezOpciones, publicoOpciones, juezCounts, publicoCounts] =
       await Promise.all([
         this.encuestas.findById(surveyId),
         this.encuestas.findCriteria(surveyId),
+        this.encuestas.findEquipos(surveyId),
         this.votos.findNumericRespuestas(surveyId),
         this.votosPublicos.findNumericRespuestas(surveyId),
         this.votos.findScoringRespuestas(surveyId),
@@ -108,7 +109,11 @@ export class ResultCalculationService {
 
     const puntuables = criterios.filter((c: any) => TIPOS_PUNTUABLES.includes(c.tipo));
     const sumaPesos = puntuables.reduce((s: number, c: any) => s + Number(c.peso ?? 1), 0);
-    const proyectos = (encuesta.competicion?.equipo ?? []).flatMap((e: any) => e.proyecto ?? []);
+    const equipoIds = new Set(equiposAsignados);
+    const equipos = equipoIds.size > 0
+      ? (encuesta.competicion?.equipo ?? []).filter((e: any) => equipoIds.has(e.id))
+      : (encuesta.competicion?.equipo ?? []);
+    const proyectos = equipos.flatMap((e: any) => e.proyecto ?? []);
     const todasNumericas = [...juezNumericas, ...publicoNumericas];
     const todasOpciones = [...juezOpciones, ...publicoOpciones];
 

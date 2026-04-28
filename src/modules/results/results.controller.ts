@@ -17,6 +17,11 @@ export class ResultsController {
     return this.facade.getSurveyResults(Number(surveyId));
   }
 
+  @Get('surveys/:surveyId/results/live')
+  live(@Param('surveyId') surveyId: string) {
+    return this.results.getLiveRanking(Number(surveyId));
+  }
+
   @Post('surveys/:surveyId/results/recalculate')
   recalculate(@Param('surveyId') surveyId: string) {
     return this.facade.recalculateSurveyResults(Number(surveyId));
