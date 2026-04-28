@@ -29,7 +29,7 @@ export class CriteriaService {
       competicion_id: competitionId,
       titulo: criterio.titulo,
       descripcion: criterio.descripcion,
-      tipo: criterio.tipo,
+      tipo: dto.tipo,
       peso: criterio.peso,
       rango_min: dto.rangoMin ?? null,
       rango_max: dto.rangoMax ?? null,
@@ -62,7 +62,7 @@ export class CriteriaService {
     return this.criterios.update(criterionId, {
       titulo: criterio.titulo,
       descripcion: criterio.descripcion,
-      tipo: criterio.tipo,
+      tipo: dto.tipo,
       peso: criterio.peso,
       rango_min: dto.rangoMin ?? null,
       rango_max: dto.rangoMax ?? null,

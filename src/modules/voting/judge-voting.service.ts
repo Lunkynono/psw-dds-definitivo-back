@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { VotanteFactory } from '../../domain/factories/votantes/votante.factory';
 import { SurveyStatePolicy } from '../../domain/policies/survey-state.policy';
 import { DuplicateVotePolicy } from '../../domain/policies/duplicate-vote.policy';
@@ -42,7 +42,7 @@ export class JudgeVotingService {
 
     const encuestasAbiertas = (data ?? [])
       .map((row: any) => row.encuesta)
-      .filter((encuesta: any) => encuesta?.estado === 'abierta');
+      .filter((encuesta: any) => encuesta?.estado === 'abierta' && encuesta?.tipo_votante !== 'publico');
 
     return Promise.all(
       encuestasAbiertas.map(async (encuesta: any) => {
@@ -73,6 +73,9 @@ export class JudgeVotingService {
   async submit(userId: string, surveyId: number, projectId: number, dto: SubmitJudgeVoteDto) {
     const encuesta = await this.encuestas.findById(surveyId);
     SurveyStatePolicy.exigirAbierta(encuesta);
+    if ((encuesta as any).tipo_votante === 'publico') {
+      throw new ForbiddenException('Esta encuesta es solo para votación pública');
+    }
     const voterHash = this.hashes.generar(userId, surveyId);
     const votante = VotanteFactory.crearJuez();
     const voto = votante.crearVoto(surveyId, projectId, voterHash, dto.respuestas);

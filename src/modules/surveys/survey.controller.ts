@@ -35,6 +35,11 @@ export class SurveyController {
     );
   }
 
+  @Get('surveys/:surveyId/criteria')
+  getCriteria(@Param('surveyId') surveyId: string) {
+    return this.surveys.getCriteria(Number(surveyId));
+  }
+
   @Get('surveys/:surveyId/assignments')
   getAssignments(@Param('surveyId') surveyId: string) {
     return this.surveys.getAssignments(Number(surveyId));
