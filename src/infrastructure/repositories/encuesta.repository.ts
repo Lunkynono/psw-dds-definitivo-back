@@ -117,6 +117,7 @@ export class EncuestaRepository extends BaseRepository {
       .eq('id', encuestaId)
       .single();
     if (actualError) throw actualError;
+    if (actual.estado === estado) return this.findById(encuestaId);
 
     const payload: Record<string, unknown> = { estado };
     if (estado === 'abierta') {
@@ -128,7 +129,7 @@ export class EncuestaRepository extends BaseRepository {
     if (estado === 'cerrada') payload.hora_cierre = new Date().toISOString();
     const { data, error } = await this.table().update(payload).eq('id', encuestaId).select().single();
     if (error) throw error;
-    return data;
+    return this.findById(data.id);
   }
 
   async updateSchedule(encuestaId: number, horaApertura: string | null, horaCierre: string | null) {
@@ -147,7 +148,7 @@ export class EncuestaRepository extends BaseRepository {
     };
     const { data, error } = await this.table().update(payload).eq('id', encuestaId).select().single();
     if (error) throw error;
-    return data;
+    return this.findById(data.id);
   }
 
   async processScheduled(encuestaId?: number, competicionId?: number) {

@@ -111,13 +111,22 @@ export class EquipoRepository {
       }
     }
 
-    await this.supabase.from('encuesta_equipo').delete().eq('equipo_id', equipoId);
-    await this.supabase.from('participante').delete().eq('equipo_id', equipoId);
+    const { error: encuestaEquipoError } = await this.supabase.from('encuesta_equipo').delete().eq('equipo_id', equipoId);
+    if (encuestaEquipoError) throw encuestaEquipoError;
+
+    const { error: participanteError } = await this.supabase.from('participante').delete().eq('equipo_id', equipoId);
+    if (participanteError) throw participanteError;
+
     if (proyectoIds.length > 0) {
-      await this.supabase.from('resultado').delete().in('proyecto_id', proyectoIds);
-      await this.supabase.from('proyecto').delete().eq('equipo_id', equipoId);
+      const { error: resultadoError } = await this.supabase.from('resultado').delete().in('proyecto_id', proyectoIds);
+      if (resultadoError) throw resultadoError;
+
+      const { error: proyectoError } = await this.supabase.from('proyecto').delete().eq('equipo_id', equipoId);
+      if (proyectoError) throw proyectoError;
     }
-    const { error } = await this.supabase.from('equipo').delete().eq('id', equipoId);
+    const { data, error } = await this.supabase.from('equipo').delete().eq('id', equipoId).select('id').maybeSingle();
     if (error) throw error;
+    if (!data) throw new Error('No se pudo eliminar el equipo');
+    return data;
   }
 }

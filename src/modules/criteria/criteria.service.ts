@@ -105,5 +105,30 @@ export class CriteriaService {
     if (dto.opciones?.some((opcion) => Number(opcion.peso ?? 0) < 0 || Number(opcion.orden ?? 0) < 0)) {
       throw new Error('Los pesos y ordenes no pueden ser negativos');
     }
+    if (['radio', 'checklist'].includes(dto.tipo)) {
+      const opciones = (dto.opciones ?? []).filter((opcion) => opcion.texto?.trim());
+      if (opciones.length < 2) {
+        throw new Error('Añade al menos dos opciones');
+      }
+      const suma = opciones.reduce((total, opcion) => total + Number(opcion.peso ?? 0), 0);
+      if (Math.abs(suma - Number(dto.peso)) >= 0.0001) {
+        throw new Error(`Peso asignado ${suma.toFixed(2)} de ${Number(dto.peso)}. Ajusta los pesos antes de guardar`);
+      }
+    }
+    if (dto.tipo === 'rubrica') {
+      const opciones = (dto.opciones ?? []).filter((opcion) => opcion.texto?.trim() && opcion.aspecto?.trim());
+      const pesosPorAspecto = new Map<string, number>();
+      for (const opcion of opciones) {
+        const aspecto = opcion.aspecto!.trim();
+        pesosPorAspecto.set(aspecto, Math.max(pesosPorAspecto.get(aspecto) ?? 0, Number(opcion.peso ?? 0)));
+      }
+      if (pesosPorAspecto.size === 0) {
+        throw new Error('Añade al menos un aspecto a evaluar');
+      }
+      const suma = [...pesosPorAspecto.values()].reduce((total, peso) => total + peso, 0);
+      if (Math.abs(suma - Number(dto.peso)) >= 0.0001) {
+        throw new Error(`Peso asignado ${suma.toFixed(2)} de ${Number(dto.peso)}. Ajusta los pesos antes de guardar`);
+      }
+    }
   }
 }

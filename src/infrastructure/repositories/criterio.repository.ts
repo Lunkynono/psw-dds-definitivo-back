@@ -42,7 +42,7 @@ export class CriterioRepository extends BaseRepository {
       if (optionError) throw optionError;
     }
 
-    return data;
+    return this.findById(data.id);
   }
 
   async update(id: number, payload: Record<string, unknown>, opciones: OpcionPayload[] = []) {
@@ -67,6 +67,12 @@ export class CriterioRepository extends BaseRepository {
       if (optionError) throw optionError;
     }
 
+    return this.findById(data.id);
+  }
+
+  private async findById(id: number) {
+    const { data, error } = await this.table().select('*, criterio_opcion(*)').eq('id', id).single();
+    if (error) throw error;
     return data;
   }
 
