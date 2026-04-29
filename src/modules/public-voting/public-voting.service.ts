@@ -21,7 +21,7 @@ export class PublicVotingService {
     const encuesta = await this.encuestas.findByCodigoSala(code);
     SurveyStatePolicy.exigirAbierta(encuesta);
     const alreadyVoted = await this.votosPublicos.existsRegistro(encuesta.id, dto.correo);
-    if (alreadyVoted) throw new Error('Este correo ya ha participado en la encuesta');
+    if (alreadyVoted) throw new Error('Ya has votado en esta encuesta');
     return { encuestaId: encuesta.id, correo: dto.correo, codigo: code };
   }
 

@@ -3,6 +3,7 @@ import { NestFactory } from '@nestjs/core';
 import { ExpressAdapter } from '@nestjs/platform-express';
 import express from 'express';
 import { AppModule } from '../src/app.module';
+import { AppExceptionFilter } from '../src/shared/filters/app-exception.filter';
 
 const server = express();
 
@@ -31,6 +32,7 @@ function bootstrap() {
       app.useGlobalPipes(
         new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true })
       );
+      app.useGlobalFilters(new AppExceptionFilter());
 
       await app.init();
     })();

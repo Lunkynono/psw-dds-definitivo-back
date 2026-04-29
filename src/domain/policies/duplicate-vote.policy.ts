@@ -14,8 +14,8 @@ export class DuplicateVotePolicy {
   static traducirError(error: unknown): never {
     const maybeError = error as { code?: string; message?: string };
     if (maybeError?.code === '23505') {
-      throw new Error('Ya existe un voto para este votante en esta encuesta');
+      throw new Error('Ya has votado en esta encuesta');
     }
-    throw error instanceof Error ? error : new Error(maybeError?.message ?? 'Error guardando el voto');
+    throw error instanceof Error ? error : new Error(maybeError?.message ?? 'No se pudo guardar el voto');
   }
 }

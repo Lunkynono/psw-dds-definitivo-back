@@ -3,7 +3,7 @@ import { DuplicateVotePolicy } from './duplicate-vote.policy';
 describe('DuplicateVotePolicy', () => {
   it('traduce el código 23505 a un mensaje funcional', () => {
     expect(() => DuplicateVotePolicy.traducirError({ code: '23505' })).toThrow(
-      'Ya existe un voto para este votante en esta encuesta'
+      'Ya has votado en esta encuesta'
     );
   });
 
