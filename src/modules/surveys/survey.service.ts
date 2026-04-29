@@ -52,7 +52,7 @@ export class SurveyService {
   async updateState(surveyId: number, dto: UpdateSurveyStateDto) {
     const actual = await this.encuestas.findById(surveyId);
     if (!SurveyStatePolicy.puedeCambiarEstado(actual.estado, dto.estado)) {
-      throw new Error(`No se permite la transición ${actual.estado} → ${dto.estado}`);
+      throw new Error(`No se puede cambiar la encuesta de ${actual.estado} a ${dto.estado}`);
     }
     if (actual.estado === 'borrador' && ['abierta', 'programada'].includes(dto.estado)) {
       await this.validateReadyToPublish(surveyId);
@@ -76,8 +76,13 @@ export class SurveyService {
     return this.encuestas.getAssignments(surveyId);
   }
 
-  updateAssignments(surveyId: number, equipoIds: number[], juecesIds: string[]) {
-    return this.encuestas.updateAssignments(surveyId, equipoIds, juecesIds);
+  async updateAssignments(surveyId: number, equipoIds: number[], juecesIds: string[]) {
+    const encuesta = await this.encuestas.findById(surveyId);
+    return this.encuestas.updateAssignments(
+      surveyId,
+      equipoIds,
+      encuesta.tipo_votante === 'publico' ? [] : juecesIds
+    );
   }
 
   processScheduled(encuestaId?: number, competicionId?: number) {

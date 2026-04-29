@@ -23,7 +23,7 @@ export class AppExceptionFilter implements ExceptionFilter {
       ? exception.message
       : typeof maybeError?.message === 'string'
         ? maybeError.message
-        : 'Error inesperado';
+        : 'No se pudo completar la acción';
     response.status(HttpStatus.BAD_REQUEST).json({
       statusCode: HttpStatus.BAD_REQUEST,
       message: this.normalizeMessage(message, HttpStatus.BAD_REQUEST)
@@ -41,15 +41,15 @@ export class AppExceptionFilter implements ExceptionFilter {
       return 'Ya existe un registro con esos datos';
     }
     if (lower.includes('must be') || lower.includes('should not') || lower.includes('property ')) {
-      return 'Revisa los campos obligatorios y los valores introducidos';
+      return 'Revisa los campos obligatorios y los valores introducidos.';
     }
     if (lower.includes('invalid input syntax') || lower.includes('nan')) {
-      return 'Hay un valor numerico no valido';
+      return 'Hay un valor numérico no válido.';
     }
     if (!text.trim()) {
-      if (status === HttpStatus.FORBIDDEN || status === HttpStatus.UNAUTHORIZED) return 'No tienes permisos para hacer esta accion';
-      if (status === HttpStatus.NOT_FOUND) return 'No se encontro el recurso solicitado';
-      return 'No se pudo completar la accion';
+      if (status === HttpStatus.FORBIDDEN || status === HttpStatus.UNAUTHORIZED) return 'No tienes permisos para hacer esta acción.';
+      if (status === HttpStatus.NOT_FOUND) return 'No se encontró el recurso solicitado.';
+      return 'No se pudo completar la acción.';
     }
 
     return text.replace(/^Error:\s*/i, '');

@@ -89,7 +89,7 @@ export class CriteriaService {
   }
 
   private validate(dto: CreateCriterionDto) {
-    if (!dto.titulo?.trim()) throw new Error('El titulo es obligatorio');
+    if (!dto.titulo?.trim()) throw new Error('El título es obligatorio');
     if (!Number.isFinite(Number(dto.peso)) || Number(dto.peso) <= 0) {
       throw new Error('El peso debe ser mayor que cero');
     }
@@ -97,13 +97,13 @@ export class CriteriaService {
       throw new Error('Los rangos no pueden ser negativos');
     }
     if (dto.rangoMin != null && dto.rangoMax != null && Number(dto.rangoMin) > Number(dto.rangoMax)) {
-      throw new Error('El rango minimo no puede ser mayor que el maximo');
+      throw new Error('El rango mínimo no puede ser mayor que el máximo');
     }
     if (dto.maxSelecciones != null && Number(dto.maxSelecciones) < 1) {
-      throw new Error('El maximo de selecciones debe ser mayor que cero');
+      throw new Error('El máximo de selecciones debe ser mayor que cero');
     }
     if (dto.opciones?.some((opcion) => Number(opcion.peso ?? 0) < 0 || Number(opcion.orden ?? 0) < 0)) {
-      throw new Error('Los pesos y ordenes no pueden ser negativos');
+      throw new Error('Los pesos y órdenes no pueden ser negativos');
     }
     if (['radio', 'checklist'].includes(dto.tipo)) {
       const opciones = (dto.opciones ?? []).filter((opcion) => opcion.texto?.trim());

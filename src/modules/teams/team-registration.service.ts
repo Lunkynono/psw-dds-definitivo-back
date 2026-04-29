@@ -69,7 +69,7 @@ export class TeamRegistrationService {
       throw new Error('Nombre del equipo y proyecto son obligatorios');
     }
     if (participantes.length === 0) {
-      throw new Error('Anade al menos un participante');
+      throw new Error('Añade al menos un participante');
     }
     const incompleto = participantes.some((p) => !p.nombre?.trim() || !p.correo?.trim() || !p.rol?.trim());
     if (incompleto) {
@@ -108,7 +108,7 @@ export class TeamRegistrationService {
         .filter(Boolean)
     );
     if (correos.some((correo) => correosJueces.has(correo))) {
-      throw new Error('Un juez no puede participar en la misma competicion');
+      throw new Error('Un juez no puede participar en la misma competición');
     }
   }
 }

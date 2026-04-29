@@ -12,17 +12,17 @@ export class ParticipantDashboardService {
       .eq('id', userId)
       .maybeSingle();
     if (error) throw error;
-    if (!persona?.correo) throw new NotFoundException('No se encontro el perfil del usuario');
+    if (!persona?.correo) throw new NotFoundException('No se encontró el perfil del usuario');
 
     const participante = await this.findParticipantByCorreo(persona.correo);
-    if (!participante) throw new NotFoundException('Este correo no esta asociado a ninguna competicion');
+    if (!participante) throw new NotFoundException('Este correo no está asociado a ninguna competición');
     return this.buildDashboard(participante.id);
   }
 
   async getByCorreo(correo: string) {
     if (!correo?.trim()) throw new NotFoundException('Introduce un correo de participante');
     const participante = await this.findParticipantByCorreo(correo.trim());
-    if (!participante) throw new NotFoundException('Este correo no esta asociado a ninguna competicion');
+    if (!participante) throw new NotFoundException('Este correo no está asociado a ninguna competición');
     return this.buildDashboard(participante.id);
   }
 

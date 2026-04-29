@@ -44,8 +44,8 @@ export class JudgeAssignmentService {
    */
   async assign(competitionId: number, dto: AssignJudgeDto) {
     const competition = await this.competiciones.findById(competitionId);
-    const persona = await this.personas.findByCorreo(dto.correo);
-    if (!persona) throw new Error('No existe ningún usuario registrado con ese correo');
+    const persona = await this.personas.findByCorreo(dto.correo.trim());
+    if (!persona) throw new Error('Este correo no está registrado como juez');
 
     JudgeAssignmentPolicy.impedirOrganizadorComoJuez(competition.evento.organizador_id, persona.id);
     await this.ensureJudgeIsNotParticipant(competitionId, persona.correo);
@@ -82,7 +82,7 @@ export class JudgeAssignmentService {
       .limit(1);
     if (error) throw error;
     if ((data ?? []).length > 0) {
-      throw new Error('Un participante no puede ser juez de la misma competicion');
+      throw new Error('Un participante no puede ser juez de la misma competición');
     }
   }
 
