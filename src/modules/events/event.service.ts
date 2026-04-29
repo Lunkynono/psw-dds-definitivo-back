@@ -52,6 +52,14 @@ export class EventService {
     return this.eventos.findById(eventId);
   }
 
+  async delete(eventId: number) {
+    const competiciones = await this.competiciones.findByEvento(eventId);
+    for (const competicion of competiciones) {
+      await this.competiciones.delete(competicion.id);
+    }
+    return this.eventos.delete(eventId);
+  }
+
   async uploadImage(eventId: number, userId: string, base64: string, contentType: string, extension: string) {
     const buffer = Buffer.from(base64, 'base64');
     const nombre = `${userId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${extension}`;

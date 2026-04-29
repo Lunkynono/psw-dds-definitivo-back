@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { CompetitionFacade } from '../../shared/facades/competition.facade';
 import { CreateCompetitionDto, UpdateCompetitionDto } from '../../shared/dto/competition.dto';
 import { CompetitionService } from './competition.service';
@@ -38,5 +38,10 @@ export class CompetitionController {
   @Patch('competitions/:competitionId')
   update(@Param('competitionId') competitionId: string, @Body() dto: UpdateCompetitionDto) {
     return this.competitions.update(Number(competitionId), dto);
+  }
+
+  @Delete('competitions/:competitionId')
+  remove(@Param('competitionId') competitionId: string) {
+    return this.competitions.delete(Number(competitionId));
   }
 }

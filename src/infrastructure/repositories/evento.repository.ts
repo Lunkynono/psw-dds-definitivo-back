@@ -43,4 +43,9 @@ export class EventoRepository extends BaseRepository {
     if (error) throw error;
     return data;
   }
+
+  async delete(id: number) {
+    const { error } = await this.table().delete().eq('id', id);
+    if (error) throw error;
+  }
 }

@@ -1,4 +1,4 @@
-import { IsArray, IsEmail, IsNotEmpty, IsOptional, IsString, ValidateNested } from 'class-validator';
+import { ArrayMinSize, IsArray, IsEmail, IsNotEmpty, IsOptional, IsString, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class ParticipantDto {
@@ -6,13 +6,13 @@ export class ParticipantDto {
   @IsNotEmpty()
   nombre: string;
 
-  @IsOptional()
   @IsEmail()
-  correo?: string;
+  @IsNotEmpty()
+  correo: string;
 
-  @IsOptional()
   @IsString()
-  rol?: string;
+  @IsNotEmpty()
+  rol: string;
 }
 
 export class ProjectDto {
@@ -35,6 +35,7 @@ export class CreateTeamDto {
   proyecto: ProjectDto;
 
   @IsArray()
+  @ArrayMinSize(1)
   @ValidateNested({ each: true })
   @Type(() => ParticipantDto)
   participantes: ParticipantDto[] = [];

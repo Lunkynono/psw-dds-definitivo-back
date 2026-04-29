@@ -12,6 +12,7 @@ export class CriteriaService {
   }
 
   async create(competitionId: number, dto: CreateCriterionDto) {
+    this.validate(dto);
     const tipo = dto.tipo as any;
     const criterio = CriterioFactory.crear({
       competicionId: competitionId,
@@ -46,6 +47,7 @@ export class CriteriaService {
   }
 
   async update(criterionId: number, dto: CreateCriterionDto) {
+    this.validate(dto);
     const tipo = dto.tipo as any;
     const criterio = CriterioFactory.crear({
       competicionId: 0,
@@ -84,5 +86,24 @@ export class CriteriaService {
   async ensureCommentCriterion(competitionId: number, criterioIds: number[]) {
     void competitionId;
     return criterioIds;
+  }
+
+  private validate(dto: CreateCriterionDto) {
+    if (!dto.titulo?.trim()) throw new Error('El titulo es obligatorio');
+    if (!Number.isFinite(Number(dto.peso)) || Number(dto.peso) <= 0) {
+      throw new Error('El peso debe ser mayor que cero');
+    }
+    if ((dto.rangoMin != null && Number(dto.rangoMin) < 0) || (dto.rangoMax != null && Number(dto.rangoMax) < 0)) {
+      throw new Error('Los rangos no pueden ser negativos');
+    }
+    if (dto.rangoMin != null && dto.rangoMax != null && Number(dto.rangoMin) > Number(dto.rangoMax)) {
+      throw new Error('El rango minimo no puede ser mayor que el maximo');
+    }
+    if (dto.maxSelecciones != null && Number(dto.maxSelecciones) < 1) {
+      throw new Error('El maximo de selecciones debe ser mayor que cero');
+    }
+    if (dto.opciones?.some((opcion) => Number(opcion.peso ?? 0) < 0 || Number(opcion.orden ?? 0) < 0)) {
+      throw new Error('Los pesos y ordenes no pueden ser negativos');
+    }
   }
 }

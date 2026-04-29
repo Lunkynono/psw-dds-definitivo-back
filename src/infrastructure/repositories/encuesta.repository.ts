@@ -175,10 +175,10 @@ export class EncuestaRepository extends BaseRepository {
     return true;
   }
 
-  async deleteClosed(encuestaId: number) {
+  async deleteRemovable(encuestaId: number) {
     const encuesta = await this.findById(encuestaId);
-    if (encuesta.estado !== 'cerrada') {
-      throw new Error('Solo se pueden eliminar encuestas cerradas');
+    if (!['borrador', 'cerrada'].includes(encuesta.estado)) {
+      throw new Error('Solo se pueden eliminar encuestas en borrador o cerradas');
     }
 
     const [{ data: votosJuez }, { data: votosPublico }] = await Promise.all([

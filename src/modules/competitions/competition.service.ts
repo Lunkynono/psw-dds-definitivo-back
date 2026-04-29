@@ -25,4 +25,8 @@ export class CompetitionService {
   update(competitionId: number, dto: UpdateCompetitionDto) {
     return this.competiciones.update(competitionId, { ...dto });
   }
+
+  delete(competitionId: number) {
+    return this.competiciones.delete(competitionId);
+  }
 }

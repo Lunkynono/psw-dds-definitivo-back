@@ -1,4 +1,4 @@
-import { IsArray, IsIn, IsNotEmpty, IsNumber, IsOptional, IsString, ValidateNested } from 'class-validator';
+import { IsArray, IsIn, IsNotEmpty, IsNumber, IsOptional, IsString, Min, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class CriterionOptionDto {
@@ -7,10 +7,12 @@ export class CriterionOptionDto {
   texto: string;
 
   @IsNumber()
+  @Min(0)
   orden: number;
 
   @IsOptional()
   @IsNumber()
+  @Min(0)
   peso?: number;
 
   @IsOptional()
@@ -39,18 +41,22 @@ export class CreateCriterionDto {
   tipo: 'numerico' | 'radio' | 'checklist' | 'comentario' | 'rubrica';
 
   @IsNumber()
+  @Min(0.1)
   peso: number = 1;
 
   @IsOptional()
   @IsNumber()
+  @Min(0)
   rangoMin?: number;
 
   @IsOptional()
   @IsNumber()
+  @Min(0)
   rangoMax?: number;
 
   @IsOptional()
   @IsNumber()
+  @Min(1)
   maxSelecciones?: number;
 
   @IsArray()

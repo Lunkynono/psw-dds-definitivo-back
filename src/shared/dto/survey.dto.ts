@@ -1,4 +1,4 @@
-import { IsArray, IsIn, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { ArrayMinSize, IsArray, IsIn, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreateSurveyDto {
   @IsString()
@@ -20,6 +20,7 @@ export class CreateSurveyDto {
   estado?: 'borrador' | 'abierta' | 'programada' | 'cerrada';
 
   @IsArray()
+  @ArrayMinSize(1)
   criterioIds: number[] = [];
 
   @IsOptional()

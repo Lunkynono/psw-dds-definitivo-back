@@ -48,6 +48,7 @@ export class JudgeAssignmentService {
     if (!persona) throw new Error('No existe ningún usuario registrado con ese correo');
 
     JudgeAssignmentPolicy.impedirOrganizadorComoJuez(competition.evento.organizador_id, persona.id);
+    await this.ensureJudgeIsNotParticipant(competitionId, persona.correo);
 
     // Asignación a la competición — idempotente: ignoramos colisiones de PK
     const { error } = await this.supabase.from('competicion_juez').insert({
@@ -72,6 +73,19 @@ export class JudgeAssignmentService {
   }
 
   /** Elimina la asignación de un juez de una competición concreta. */
+  private async ensureJudgeIsNotParticipant(competitionId: number, correo: string) {
+    const { data, error } = await this.supabase
+      .from('participante')
+      .select('id, equipo!inner(competicion_id)')
+      .ilike('correo', correo.trim())
+      .eq('equipo.competicion_id', competitionId)
+      .limit(1);
+    if (error) throw error;
+    if ((data ?? []).length > 0) {
+      throw new Error('Un participante no puede ser juez de la misma competicion');
+    }
+  }
+
   async remove(competitionId: number, personId: string) {
     const encuestas = await this.encuestas.findByCompeticion(competitionId);
     const encuestaIds = encuestas.map((encuesta: any) => encuesta.id);

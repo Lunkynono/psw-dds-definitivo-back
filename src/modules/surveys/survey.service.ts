@@ -23,9 +23,12 @@ export class SurveyService {
 
   async create(competitionId: number, creatorId: string, dto: CreateSurveyDto) {
     const criterioIds = await this.criterios.ensureCommentCriterion(competitionId, dto.criterioIds ?? []);
+    if (criterioIds.length === 0) {
+      throw new Error('Selecciona al menos un criterio');
+    }
 
     const estadoEncuesta = dto.estado === 'borrador' ? 'borrador' : dto.horaApertura ? 'programada' : 'abierta';
-    const horaAperturaReal = estadoEncuesta === 'borrador' ? null : dto.horaApertura ?? new Date().toISOString();
+    const horaAperturaReal = estadoEncuesta === 'abierta' ? new Date().toISOString() : dto.horaApertura ?? null;
 
     return this.encuestas.createWithCriteria(
       {
@@ -51,6 +54,9 @@ export class SurveyService {
     if (!SurveyStatePolicy.puedeCambiarEstado(actual.estado, dto.estado)) {
       throw new Error(`No se permite la transición ${actual.estado} → ${dto.estado}`);
     }
+    if (actual.estado === 'borrador' && ['abierta', 'programada'].includes(dto.estado)) {
+      await this.validateReadyToPublish(surveyId);
+    }
     return this.encuestas.updateState(surveyId, dto.estado);
   }
 
@@ -58,7 +64,11 @@ export class SurveyService {
     return this.encuestas.findCriteria(surveyId);
   }
 
-  updateSchedule(surveyId: number, horaApertura: string | null, horaCierre: string | null) {
+  async updateSchedule(surveyId: number, horaApertura: string | null, horaCierre: string | null) {
+    const actual = await this.encuestas.findById(surveyId);
+    if (actual.estado === 'borrador') {
+      await this.validateReadyToPublish(surveyId);
+    }
     return this.encuestas.updateSchedule(surveyId, horaApertura, horaCierre);
   }
 
@@ -75,6 +85,24 @@ export class SurveyService {
   }
 
   delete(surveyId: number) {
-    return this.encuestas.deleteClosed(surveyId);
+    return this.encuestas.deleteRemovable(surveyId);
+  }
+
+  private async validateReadyToPublish(surveyId: number) {
+    const [encuesta, criterios, asignaciones] = await Promise.all([
+      this.encuestas.findById(surveyId),
+      this.encuestas.findCriteria(surveyId),
+      this.encuestas.getAssignments(surveyId)
+    ]);
+
+    if (criterios.length === 0) {
+      throw new Error('Selecciona al menos un criterio antes de publicar');
+    }
+    if (asignaciones.equiposAsignados.length === 0) {
+      throw new Error('Selecciona al menos un equipo antes de publicar');
+    }
+    if (['juez', 'ambos'].includes(encuesta.tipo_votante) && asignaciones.juecesAsignados.length === 0) {
+      throw new Error('Selecciona al menos un jurado antes de publicar');
+    }
   }
 }
