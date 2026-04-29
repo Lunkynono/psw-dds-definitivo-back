@@ -13,8 +13,8 @@ import { AssignJudgeDto } from '../../shared/dto/judge.dto';
  *  - El juez se identifica por correo y debe existir previamente en `persona`.
  *  - El organizador del evento NO puede ser juez de su propia competición
  *    (lo aplica `JudgeAssignmentPolicy`).
- *  - Si no se especifican `encuestaIds`, el juez queda asignado a TODAS las
- *    encuestas existentes de la competición (igual que en `CompeticionDetalle.jsx`).
+ *  - Si no se especifican `encuestaIds`, o viene un array vacío, el juez queda
+ *    asignado a la competición, pero no a ninguna encuesta concreta.
  *  - Las violaciones de unicidad (`23505`) se ignoran para que asignar a un juez
  *    ya existente sea idempotente.
  */
@@ -40,7 +40,7 @@ export class JudgeAssignmentService {
   /**
    * Asigna a una persona como juez de una competición y, opcionalmente, de un
    * subconjunto concreto de sus encuestas. Si `encuestaIds` viene vacío, se
-   * propaga la asignación a todas las encuestas de la competición.
+   * queda como juez disponible de la competición sin encuestas asignadas.
    */
   async assign(competitionId: number, dto: AssignJudgeDto) {
     const competition = await this.competiciones.findById(competitionId);
@@ -57,7 +57,9 @@ export class JudgeAssignmentService {
     });
     if (error && error.code !== '23505') throw error;
 
-    const encuestaIds = dto.encuestaIds ?? [];
+    const encuestaIds = Array.isArray(dto.encuestaIds)
+      ? dto.encuestaIds.filter((encuestaId) => Number.isFinite(Number(encuestaId)))
+      : [];
 
     if (encuestaIds.length > 0) {
       const { error: encuestaError } = await this.supabase
