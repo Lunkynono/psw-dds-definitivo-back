@@ -36,13 +36,13 @@ export class AuthService {
       ? (await this.personas.findById(data.user.id)) ??
         (await this.personas.upsert({ id: data.user.id, nombre, correo: dto.correo }))
       : null;
-    const rol = data.user ? await this.roles.resolveRole(data.user.id) : null;
-    return { session: data.session, user: data.user, perfil, rol };
+    const roles = data.user ? await this.roles.resolveRoles(data.user.id) : [];
+    return { session: data.session, user: data.user, perfil, roles };
   }
 
   async me(userId: string) {
     const perfil = await this.personas.findById(userId);
-    const rol = await this.roles.resolveRole(userId);
-    return { perfil, rol };
+    const roles = await this.roles.resolveRoles(userId);
+    return { perfil, roles };
   }
 }

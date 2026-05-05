@@ -14,14 +14,25 @@ export class UserRoleService {
   ) {}
 
   async resolveRole(userId: string): Promise<UserRole> {
+    const roles = await this.resolveRoles(userId);
+    return roles[0] ?? 'juez';
+  }
+
+  async resolveRoles(userId: string): Promise<UserRole[]> {
+    const roles: UserRole[] = [];
+
     const propios = await this.eventos.findByOrganizador(userId);
-    if (propios.length > 0) return 'admin';
+    if (propios.length > 0) roles.push('admin');
 
     const persona = await this.personas.findById(userId);
-    if (persona?.correo && await this.participants.hasParticipantByCorreo(persona.correo)) {
-      return 'participante';
+    const esParticipante = !!(persona?.correo && await this.participants.hasParticipantByCorreo(persona.correo));
+
+    if (esParticipante) {
+      roles.push('participante');
+    } else {
+      roles.push('juez');
     }
 
-    return 'juez';
+    return roles;
   }
 }
