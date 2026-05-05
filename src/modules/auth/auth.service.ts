@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { SupabaseAdapter } from '../../infrastructure/supabase/supabase.adapter';
 import { LoginDto, RegisterDto } from '../../shared/dto/auth.dto';
 import { PersonaRepository } from '../../infrastructure/repositories/persona.repository';
+import { EventoRepository } from '../../infrastructure/repositories/evento.repository';
 import { UserRoleService } from '../users/user-role.service';
 
 @Injectable()
@@ -9,6 +10,7 @@ export class AuthService {
   constructor(
     private readonly supabase: SupabaseAdapter,
     private readonly personas: PersonaRepository,
+    private readonly eventos: EventoRepository,
     private readonly roles: UserRoleService
   ) {}
 
@@ -22,6 +24,9 @@ export class AuthService {
     const perfil = data.user
       ? await this.personas.upsert({ id: data.user.id, nombre: dto.nombre, correo: dto.correo })
       : null;
+    if (data.user && dto.tipo === 'admin') {
+      await this.eventos.create({ organizador_id: data.user.id, nombre: 'Mi primer evento', lugar: null, descripcion: null });
+    }
     return { ...data, perfil };
   }
 
