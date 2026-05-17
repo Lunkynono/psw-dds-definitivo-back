@@ -10,8 +10,14 @@ async function bootstrap() {
   app.use(require('express').urlencoded({ limit: '10mb', extended: true }));
   const config = app.get(ConfigService);
 
+  const configuredOrigin = config.get<string>('FRONTEND_ORIGIN');
+  const allowedOrigins = new Set([
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+    ...(configuredOrigin ? configuredOrigin.split(',').map((origin) => origin.trim()) : [])
+  ]);
   app.enableCors({
-    origin: config.get<string>('FRONTEND_ORIGIN') ?? 'http://localhost:5173',
+    origin: [...allowedOrigins],
     credentials: true
   });
 

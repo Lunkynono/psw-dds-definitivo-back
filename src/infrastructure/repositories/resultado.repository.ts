@@ -6,7 +6,7 @@ export class ResultadoRepository {
   constructor(private readonly supabase: SupabaseAdapter) {}
 
   async findByEncuesta(encuestaId: number) {
-    const { data, error } = await this.supabase.from('resultado').select('*, proyecto(*)').eq('encuesta_id', encuestaId).order('posicion_final');
+    const { data, error } = await this.supabase.from('resultado').select('*, proyecto(*, equipo(nombre))').eq('encuesta_id', encuestaId).order('posicion_final');
     if (error) throw error;
     return data ?? [];
   }

@@ -33,6 +33,9 @@ export class CompeticionRepository extends BaseRepository {
   }
 
   async delete(id: number) {
+    const { error: premioError } = await this.supabase.from('premio').delete().eq('competicion_id', id);
+    if (premioError && premioError.code !== '42P01') throw premioError;
+
     const [{ data: encuestas }, { data: criterios }, { data: equipos }] = await Promise.all([
       this.supabase.from('encuesta').select('id').eq('competicion_id', id),
       this.supabase.from('criterio').select('id').eq('competicion_id', id),

@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AuthController } from './modules/auth/auth.controller';
+import { AwardController } from './modules/awards/award.controller';
 import { CompetitionController } from './modules/competitions/competition.controller';
 import { CriteriaController } from './modules/criteria/criteria.controller';
 import { EventController } from './modules/events/event.controller';
@@ -12,6 +13,7 @@ import { ResultsController } from './modules/results/results.controller';
 import { SurveyController } from './modules/surveys/survey.controller';
 import { TeamController } from './modules/teams/team.controller';
 import { AuthService } from './modules/auth/auth.service';
+import { AwardService } from './modules/awards/award.service';
 import { UserRoleService } from './modules/users/user-role.service';
 import { CompetitionService } from './modules/competitions/competition.service';
 import { CriteriaService } from './modules/criteria/criteria.service';
@@ -34,6 +36,7 @@ import { EncuestaRepository } from './infrastructure/repositories/encuesta.repos
 import { EquipoRepository } from './infrastructure/repositories/equipo.repository';
 import { EventoRepository } from './infrastructure/repositories/evento.repository';
 import { PersonaRepository } from './infrastructure/repositories/persona.repository';
+import { PremioRepository } from './infrastructure/repositories/premio.repository';
 import { ResultadoRepository } from './infrastructure/repositories/resultado.repository';
 import { VotoPublicoRepository } from './infrastructure/repositories/voto-publico.repository';
 import { VotoRepository } from './infrastructure/repositories/voto.repository';
@@ -45,6 +48,7 @@ import { ResultScoreCalculator } from './domain/services/result-score.calculator
   imports: [ConfigModule.forRoot({ isGlobal: true })],
   controllers: [
     AuthController,
+    AwardController,
     EventController,
     CompetitionController,
     TeamController,
@@ -68,7 +72,9 @@ import { ResultScoreCalculator } from './domain/services/result-score.calculator
     VotoRepository,
     VotoPublicoRepository,
     ResultadoRepository,
+    PremioRepository,
     AuthService,
+    AwardService,
     UserRoleService,
     EventService,
     CompetitionService,

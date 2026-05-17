@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CompeticionRepository } from '../../infrastructure/repositories/competicion.repository';
 import { EventoRepository } from '../../infrastructure/repositories/evento.repository';
 import { SupabaseAdapter } from '../../infrastructure/supabase/supabase.adapter';
+import { PremioRepository } from '../../infrastructure/repositories/premio.repository';
 import { CreateEventDto, UpdateEventDto } from '../../shared/dto/event.dto';
 
 const EVENTOS_BUCKET = 'eventos';
@@ -11,6 +12,7 @@ export class EventService {
   constructor(
     private readonly eventos: EventoRepository,
     private readonly competiciones: CompeticionRepository,
+    private readonly premios: PremioRepository,
     private readonly supabase: SupabaseAdapter
   ) {}
 
@@ -53,6 +55,7 @@ export class EventService {
   }
 
   async delete(eventId: number) {
+    await this.premios.deleteByEvento(eventId);
     const competiciones = await this.competiciones.findByEvento(eventId);
     for (const competicion of competiciones) {
       await this.competiciones.delete(competicion.id);
