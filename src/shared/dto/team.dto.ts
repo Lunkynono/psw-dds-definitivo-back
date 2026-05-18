@@ -1,4 +1,4 @@
-import { ArrayMinSize, IsArray, IsEmail, IsNotEmpty, IsOptional, IsString, ValidateNested } from 'class-validator';
+import { ArrayMinSize, IsArray, IsEmail, IsNotEmpty, IsNumber, IsOptional, IsString, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class ParticipantDto {
@@ -15,6 +15,23 @@ export class ParticipantDto {
   rol: string;
 }
 
+export class ProjectFileDto {
+  @IsString()
+  @IsNotEmpty()
+  nombre: string;
+
+  @IsString()
+  @IsNotEmpty()
+  tipo: string;
+
+  @IsNumber()
+  tamano: number;
+
+  @IsString()
+  @IsNotEmpty()
+  base64: string;
+}
+
 export class ProjectDto {
   @IsString()
   @IsNotEmpty()
@@ -23,6 +40,11 @@ export class ProjectDto {
   @IsOptional()
   @IsString()
   descripcion?: string;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => ProjectFileDto)
+  archivo?: ProjectFileDto;
 }
 
 export class CreateTeamDto {

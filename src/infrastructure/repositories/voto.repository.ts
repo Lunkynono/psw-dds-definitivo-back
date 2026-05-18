@@ -66,6 +66,25 @@ export class VotoRepository {
       }));
   }
 
+  async findCommentsForAiSummary(surveyId: number) {
+    const { data, error } = await this.supabase
+      .from('respuesta_criterio')
+      .select('valor_texto, criterio!inner(tipo, titulo), voto!inner(encuesta_id, proyecto_id, proyecto(id, nombre, equipo(nombre)))')
+      .eq('voto.encuesta_id', surveyId)
+      .not('valor_texto', 'is', null);
+    if (error) throw error;
+    return (data ?? [])
+      .filter((r: any) => r.criterio?.tipo === 'comentario' && r.valor_texto?.trim())
+      .map((r: any) => ({
+        texto: r.valor_texto.trim(),
+        criterio: r.criterio?.titulo ?? 'Comentario',
+        proyectoId: Number(r.voto?.proyecto_id),
+        proyecto: r.voto?.proyecto?.nombre,
+        equipo: r.voto?.proyecto?.equipo?.nombre,
+        origen: 'Jurado'
+      }));
+  }
+
   async findJudgeVotes(encuestaId: number, voterHash: string) {
     const { data, error } = await this.supabase.from('voto').select('*').eq('encuesta_id', encuestaId).eq('voter_hash', voterHash);
     if (error) throw error;

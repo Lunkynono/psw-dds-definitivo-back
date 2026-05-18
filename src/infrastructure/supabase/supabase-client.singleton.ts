@@ -23,14 +23,29 @@ export class SupabaseClientSingleton {
   getClient(): SupabaseClient {
     if (!this.client) {
       const url = this.config.getOrThrow<string>('SUPABASE_URL');
-      const key =
-        this.config.get<string>('SUPABASE_SERVICE_ROLE_KEY') ??
-        this.config.getOrThrow<string>('SUPABASE_ANON_KEY');
+      const key = this.config.getOrThrow<string>('SUPABASE_SERVICE_ROLE_KEY');
+      this.assertServiceRoleKey(key);
+
       this.client = createClient(url, key, {
         auth: { persistSession: false, autoRefreshToken: false }
       });
     }
 
     return this.client;
+  }
+
+  private assertServiceRoleKey(key: string) {
+    const payload = key.split('.')[1];
+    if (!payload) {
+      throw new Error('SUPABASE_SERVICE_ROLE_KEY no tiene formato JWT valido');
+    }
+
+    const normalized = payload.replace(/-/g, '+').replace(/_/g, '/');
+    const padded = normalized.padEnd(normalized.length + ((4 - (normalized.length % 4)) % 4), '=');
+    const decoded = JSON.parse(Buffer.from(padded, 'base64').toString('utf8')) as { role?: string };
+
+    if (decoded.role !== 'service_role') {
+      throw new Error('SUPABASE_SERVICE_ROLE_KEY debe ser una key con role service_role para evitar bloqueos RLS');
+    }
   }
 }

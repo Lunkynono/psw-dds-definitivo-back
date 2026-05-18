@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AuthController } from './modules/auth/auth.controller';
+import { AiSummaryController } from './modules/ai-summaries/ai-summary.controller';
 import { AwardController } from './modules/awards/award.controller';
 import { CompetitionController } from './modules/competitions/competition.controller';
 import { CriteriaController } from './modules/criteria/criteria.controller';
@@ -13,6 +14,7 @@ import { ResultsController } from './modules/results/results.controller';
 import { SurveyController } from './modules/surveys/survey.controller';
 import { TeamController } from './modules/teams/team.controller';
 import { AuthService } from './modules/auth/auth.service';
+import { AiSummaryService } from './modules/ai-summaries/ai-summary.service';
 import { AwardService } from './modules/awards/award.service';
 import { UserRoleService } from './modules/users/user-role.service';
 import { CompetitionService } from './modules/competitions/competition.service';
@@ -31,6 +33,7 @@ import { VotingFacade } from './shared/facades/voting.facade';
 import { SupabaseAdapter } from './infrastructure/supabase/supabase.adapter';
 import { SupabaseClientSingleton } from './infrastructure/supabase/supabase-client.singleton';
 import { CompeticionRepository } from './infrastructure/repositories/competicion.repository';
+import { AiSummaryRepository } from './infrastructure/repositories/ai-summary.repository';
 import { CriterioRepository } from './infrastructure/repositories/criterio.repository';
 import { EncuestaRepository } from './infrastructure/repositories/encuesta.repository';
 import { EquipoRepository } from './infrastructure/repositories/equipo.repository';
@@ -48,6 +51,7 @@ import { ResultScoreCalculator } from './domain/services/result-score.calculator
   imports: [ConfigModule.forRoot({ isGlobal: true })],
   controllers: [
     AuthController,
+    AiSummaryController,
     AwardController,
     EventController,
     CompetitionController,
@@ -63,6 +67,7 @@ import { ResultScoreCalculator } from './domain/services/result-score.calculator
   providers: [
     SupabaseClientSingleton,
     SupabaseAdapter,
+    AiSummaryRepository,
     PersonaRepository,
     EventoRepository,
     CompeticionRepository,
@@ -74,6 +79,7 @@ import { ResultScoreCalculator } from './domain/services/result-score.calculator
     ResultadoRepository,
     PremioRepository,
     AuthService,
+    AiSummaryService,
     AwardService,
     UserRoleService,
     EventService,

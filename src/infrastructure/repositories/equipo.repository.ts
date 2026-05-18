@@ -45,6 +45,46 @@ export class EquipoRepository {
     return { equipo, proyecto };
   }
 
+  async updateProjectFile(proyectoId: number, archivo: {
+    url: string;
+    nombre: string;
+    tipo: string;
+    tamano: number;
+    path: string;
+  }) {
+    const { data, error } = await this.supabase.from('proyecto').update({
+      archivo_url: archivo.url,
+      archivo_nombre: archivo.nombre,
+      archivo_tipo: archivo.tipo,
+      archivo_tamano: archivo.tamano,
+      archivo_path: archivo.path
+    }).eq('id', proyectoId).select().single();
+    if (error) throw error;
+    return data;
+  }
+
+  async findProjectFile(proyectoId: number) {
+    const { data, error } = await this.supabase
+      .from('proyecto')
+      .select('id, archivo_path, archivo_url, archivo_nombre')
+      .eq('id', proyectoId)
+      .maybeSingle();
+    if (error) throw error;
+    return data;
+  }
+
+  async clearProjectFile(proyectoId: number) {
+    const { data, error } = await this.supabase.from('proyecto').update({
+      archivo_url: null,
+      archivo_nombre: null,
+      archivo_tipo: null,
+      archivo_tamano: null,
+      archivo_path: null
+    }).eq('id', proyectoId).select().single();
+    if (error) throw error;
+    return data;
+  }
+
   async update(equipoId: number, payload: {
     nombre: string;
     proyectoId: number | null;
@@ -55,6 +95,8 @@ export class EquipoRepository {
     const { error: e1 } = await this.supabase.from('equipo').update({ nombre: payload.nombre }).eq('id', equipoId);
     if (e1) throw e1;
 
+    let proyectoId = payload.proyectoId;
+
     if (payload.proyectoId) {
       const { error: e2 } = await this.supabase.from('proyecto').update({
         nombre: payload.proyectoNombre,
@@ -62,12 +104,13 @@ export class EquipoRepository {
       }).eq('id', payload.proyectoId);
       if (e2) throw e2;
     } else {
-      const { error: e2 } = await this.supabase.from('proyecto').insert({
+      const { data: nuevoProyecto, error: e2 } = await this.supabase.from('proyecto').insert({
         equipo_id: equipoId,
         nombre: payload.proyectoNombre,
         descripcion: payload.proyectoDesc ?? null
-      });
+      }).select('id').single();
       if (e2) throw e2;
+      proyectoId = nuevoProyecto.id;
     }
 
     const { data: actuales, error: e3 } = await this.supabase.from('participante').select('id').eq('equipo_id', equipoId);
@@ -95,6 +138,8 @@ export class EquipoRepository {
       );
       if (e5) throw e5;
     }
+
+    return { proyectoId };
   }
 
   async delete(equipoId: number) {

@@ -66,6 +66,25 @@ export class VotoPublicoRepository {
       }));
   }
 
+  async findCommentsForAiSummary(surveyId: number) {
+    const { data, error } = await this.supabase
+      .from('respuesta_criterio_publico')
+      .select('valor_texto, criterio!inner(tipo, titulo), voto_publico!inner(encuesta_id, proyecto_id, proyecto(id, nombre, equipo(nombre)))')
+      .eq('voto_publico.encuesta_id', surveyId)
+      .not('valor_texto', 'is', null);
+    if (error) throw error;
+    return (data ?? [])
+      .filter((r: any) => r.criterio?.tipo === 'comentario' && r.valor_texto?.trim())
+      .map((r: any) => ({
+        texto: r.valor_texto.trim(),
+        criterio: r.criterio?.titulo ?? 'Comentario',
+        proyectoId: Number(r.voto_publico?.proyecto_id),
+        proyecto: r.voto_publico?.proyecto?.nombre,
+        equipo: r.voto_publico?.proyecto?.equipo?.nombre,
+        origen: 'Publico'
+      }));
+  }
+
   async existsRegistro(encuestaId: number, correo: string) {
     const { data, error } = await this.supabase.from('publico_registro').select('*').eq('encuesta_id', encuestaId).eq('correo_votante', correo).maybeSingle();
     if (error) throw error;
