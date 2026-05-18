@@ -6,8 +6,8 @@ import { AppExceptionFilter } from './shared/filters/app-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.use(require('express').json({ limit: '10mb' }));
-  app.use(require('express').urlencoded({ limit: '10mb', extended: true }));
+  app.use(require('express').json({ limit: '75mb' }));
+  app.use(require('express').urlencoded({ limit: '75mb', extended: true }));
   const config = app.get(ConfigService);
 
   const configuredOrigin = config.get<string>('FRONTEND_ORIGIN');

@@ -14,8 +14,8 @@ function bootstrap() {
     ready = (async () => {
       const app = await NestFactory.create(AppModule, new ExpressAdapter(server), { logger: false });
 
-      app.use(express.json({ limit: '10mb' }));
-      app.use(express.urlencoded({ limit: '10mb', extended: true }));
+      app.use(express.json({ limit: '75mb' }));
+      app.use(express.urlencoded({ limit: '75mb', extended: true }));
 
       const allowedOrigin = process.env.FRONTEND_ORIGIN ?? 'http://localhost:5173';
       app.enableCors({

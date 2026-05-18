@@ -14,20 +14,30 @@ export class ParticipantDashboardService {
     if (error) throw error;
     if (!persona?.correo) throw new NotFoundException('No se encontró el perfil del usuario');
 
-    const participante = await this.findParticipantByCorreo(persona.correo);
+    const participante = await this.findParticipantsByCorreo(persona.correo);
     if (!participante) throw new NotFoundException('Este correo no está asociado a ninguna competición');
-    return this.buildDashboard(participante.id);
+    if (participante.length === 0) throw new NotFoundException('Este correo no esta asociado a ninguna competicion');
+    return this.getByCorreo(persona.correo);
   }
 
   async getByCorreo(correo: string) {
     if (!correo?.trim()) throw new NotFoundException('Introduce un correo de participante');
-    const participante = await this.findParticipantByCorreo(correo.trim());
+    const participante = await this.findParticipantsByCorreo(correo.trim());
     if (!participante) throw new NotFoundException('Este correo no está asociado a ninguna competición');
-    return this.buildDashboard(participante.id);
+    if (participante.length === 0) throw new NotFoundException('Este correo no esta asociado a ninguna competicion');
+    const dashboards = await Promise.all(participante.map((item) => this.buildDashboard(item.id)));
+    return {
+      ...dashboards[0],
+      participaciones: dashboards
+    };
   }
 
   async getById(participantId: number) {
-    return this.buildDashboard(participantId);
+    const dashboard = await this.buildDashboard(participantId);
+    return {
+      ...dashboard,
+      participaciones: [dashboard]
+    };
   }
 
   async update(participantId: number, dto: { nombre?: string; correo?: string; rol?: string | null }) {
@@ -46,19 +56,18 @@ export class ParticipantDashboardService {
   }
 
   async hasParticipantByCorreo(correo: string) {
-    const participante = await this.findParticipantByCorreo(correo);
-    return Boolean(participante);
+    const participante = await this.findParticipantsByCorreo(correo);
+    return participante.length > 0;
   }
 
-  private async findParticipantByCorreo(correo: string) {
+  private async findParticipantsByCorreo(correo: string) {
     const { data, error } = await this.supabase
       .from('participante')
       .select('id')
       .ilike('correo', correo)
-      .order('id', { ascending: false })
-      .limit(1);
+      .order('id', { ascending: false });
     if (error) throw error;
-    return data?.[0] ?? null;
+    return data ?? [];
   }
 
   private async buildDashboard(participantId: number) {

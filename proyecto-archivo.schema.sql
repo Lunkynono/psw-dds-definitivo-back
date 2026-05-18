@@ -8,7 +8,8 @@ alter table if exists public.proyecto
 grant select, insert, update, delete on table public.proyecto to service_role;
 
 insert into storage.buckets (id, name, public, file_size_limit)
-values ('proyectos', 'proyectos', true, 20971520)
+values ('proyectos', 'proyectos', true, 52428800)
 on conflict (id) do update
 set public = true,
-    file_size_limit = 20971520;
+    file_size_limit = 52428800,
+    allowed_mime_types = null;

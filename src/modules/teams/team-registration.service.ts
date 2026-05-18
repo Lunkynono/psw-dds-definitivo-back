@@ -4,7 +4,7 @@ import { SupabaseAdapter } from '../../infrastructure/supabase/supabase.adapter'
 import { CreateTeamDto } from '../../shared/dto/team.dto';
 
 const PROJECT_FILES_BUCKET = 'proyectos';
-const MAX_PROJECT_FILE_BYTES = 20 * 1024 * 1024;
+const MAX_PROJECT_FILE_BYTES = 50 * 1024 * 1024;
 
 @Injectable()
 export class TeamRegistrationService {
@@ -141,7 +141,7 @@ export class TeamRegistrationService {
       throw new Error('El archivo del proyecto no es valido');
     }
     if (archivo.tamano > MAX_PROJECT_FILE_BYTES) {
-      throw new Error('El archivo del proyecto no puede superar 20 MB');
+      throw new Error('El archivo del proyecto no puede superar 50 MB');
     }
 
     const buffer = Buffer.from(archivo.base64, 'base64');
