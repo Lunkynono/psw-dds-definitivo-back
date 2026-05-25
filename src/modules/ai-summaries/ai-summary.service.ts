@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AiSummaryRepository } from '../../infrastructure/repositories/ai-summary.repository';
 import { VotoPublicoRepository } from '../../infrastructure/repositories/voto-publico.repository';
@@ -15,6 +15,8 @@ type AiSummaryJson = {
 
 @Injectable()
 export class AiSummaryService {
+  private readonly logger = new Logger(AiSummaryService.name);
+
   constructor(
     private readonly summaries: AiSummaryRepository,
     private readonly votos: VotoRepository,
@@ -32,6 +34,16 @@ export class AiSummaryService {
     const saved = [];
 
     for (const group of grouped.values()) {
+      const model = this.config.get<string>('AI_MODEL') ?? 'gpt-4o-mini';
+      this.logger.log(JSON.stringify({
+        message: 'Generando resumen IA para proyecto',
+        encuesta_id: surveyId,
+        proyecto_id: group.proyectoId,
+        aiProviderConfigured: Boolean(this.config.get<string>('AI_API_URL')),
+        modelo: model,
+        total_comentarios: group.comments.length
+      }));
+
       const aiResult = await this.callAi({
         projectName: group.proyectoNombre,
         teamName: group.equipoNombre,
@@ -53,7 +65,7 @@ export class AiSummaryService {
         sentimiento: aiResult.sentimiento,
         temas: aiResult.temas,
         totalComentarios: group.comments.length,
-        modelo: this.config.get<string>('AI_MODEL') ?? null
+        modelo: model
       }));
     }
 
