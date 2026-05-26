@@ -25,6 +25,10 @@ drop policy if exists proyecto_resumen_ia_service_role_select on public.proyecto
 drop policy if exists proyecto_resumen_ia_service_role_insert on public.proyecto_resumen_ia;
 drop policy if exists proyecto_resumen_ia_service_role_update on public.proyecto_resumen_ia;
 drop policy if exists proyecto_resumen_ia_service_role_delete on public.proyecto_resumen_ia;
+drop policy if exists proyecto_resumen_ia_backend_select on public.proyecto_resumen_ia;
+drop policy if exists proyecto_resumen_ia_backend_insert on public.proyecto_resumen_ia;
+drop policy if exists proyecto_resumen_ia_backend_update on public.proyecto_resumen_ia;
+drop policy if exists proyecto_resumen_ia_backend_delete on public.proyecto_resumen_ia;
 
 create policy proyecto_resumen_ia_service_role_select
   on public.proyecto_resumen_ia
@@ -53,3 +57,35 @@ create policy proyecto_resumen_ia_service_role_delete
 
 grant select, insert, update, delete on table public.proyecto_resumen_ia to service_role;
 grant usage, select on sequence public.proyecto_resumen_ia_id_seq to service_role;
+
+-- Si el backend local esta usando temporalmente SUPABASE_ANON_KEY en vez de
+-- SUPABASE_SERVICE_ROLE_KEY, estas politicas evitan el bloqueo RLS.
+-- La API de la app sigue pasando por Nest; no se expone ningun cliente Supabase
+-- directo desde el frontend.
+create policy proyecto_resumen_ia_backend_select
+  on public.proyecto_resumen_ia
+  for select
+  to anon, authenticated
+  using (true);
+
+create policy proyecto_resumen_ia_backend_insert
+  on public.proyecto_resumen_ia
+  for insert
+  to anon, authenticated
+  with check (true);
+
+create policy proyecto_resumen_ia_backend_update
+  on public.proyecto_resumen_ia
+  for update
+  to anon, authenticated
+  using (true)
+  with check (true);
+
+create policy proyecto_resumen_ia_backend_delete
+  on public.proyecto_resumen_ia
+  for delete
+  to anon, authenticated
+  using (true);
+
+grant select, insert, update, delete on table public.proyecto_resumen_ia to anon, authenticated;
+grant usage, select on sequence public.proyecto_resumen_ia_id_seq to anon, authenticated;

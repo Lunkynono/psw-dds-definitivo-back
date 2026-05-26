@@ -29,7 +29,6 @@ export class AiSummaryService {
   async generateForSurvey(surveyId: number) {
     const comments = await this.collectComments(surveyId);
     const grouped = this.groupByProject(comments);
-    const saved = [];
 
     for (const group of grouped.values()) {
       const aiResult = await this.callAi({
@@ -42,7 +41,7 @@ export class AiSummaryService {
         }))
       });
 
-      saved.push(await this.summaries.upsert({
+      await this.summaries.replace({
         encuestaId: surveyId,
         proyectoId: group.proyectoId,
         proyectoNombre: group.proyectoNombre,
@@ -54,10 +53,10 @@ export class AiSummaryService {
         temas: aiResult.temas,
         totalComentarios: group.comments.length,
         modelo: this.config.get<string>('AI_MODEL') ?? null
-      }));
+      });
     }
 
-    return saved;
+    return this.summaries.findBySurvey(surveyId);
   }
 
   private async collectComments(surveyId: number) {

@@ -15,7 +15,7 @@ export class AiSummaryRepository {
     return data ?? [];
   }
 
-  async upsert(summary: {
+  async replace(summary: {
     encuestaId: number;
     proyectoId: number;
     proyectoNombre: string;
@@ -28,9 +28,18 @@ export class AiSummaryRepository {
     totalComentarios: number;
     modelo?: string | null;
   }) {
+    const now = new Date().toISOString();
+
+    const { error: deleteError } = await this.supabase
+      .from('proyecto_resumen_ia')
+      .delete()
+      .eq('encuesta_id', summary.encuestaId)
+      .eq('proyecto_id', summary.proyectoId);
+    if (deleteError) throw deleteError;
+
     const { data, error } = await this.supabase
       .from('proyecto_resumen_ia')
-      .upsert({
+      .insert({
         encuesta_id: summary.encuestaId,
         proyecto_id: summary.proyectoId,
         proyecto_nombre: summary.proyectoNombre,
@@ -42,8 +51,8 @@ export class AiSummaryRepository {
         temas: summary.temas,
         total_comentarios: summary.totalComentarios,
         modelo: summary.modelo ?? null,
-        updated_at: new Date().toISOString()
-      }, { onConflict: 'encuesta_id,proyecto_id' })
+        updated_at: now
+      })
       .select()
       .single();
     if (error) throw error;
